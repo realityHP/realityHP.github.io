@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人网站</title>
+<style>
+/* ===== Reset & Variables ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --font: -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+  --max-w: 880px;
+  --nav-h: 56px;
+  --radius: 12px;
+  /* 默认/访客主题 */
+  --accent: #0d9488;
+  --accent-light: #ccfbf1;
+  --accent-dim: #f0fdfa;
+}
+body{
+  font-family: var(--font);
+  color: #1d1d1f;
+  background: #fff;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+a{color:var(--accent);text-decoration:none}
+img{max-width:100%;display:block}
+.container{max-width:var(--max-w);margin:0 auto;padding:0 24px}
+
+/* ===== Picker Overlay ===== */
+.picker-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:#fafafa;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px;
+}
+.picker-overlay.hidden{display:none}
+.picker-title{
+  font-size:clamp(1.5rem,3.5vw,2rem);
+  font-weight:700;
+  margin-bottom:8px;
+  text-align:center;
+}
+.picker-sub{
+  color:#6e6e73;
+  margin-bottom:48px;
+  text-align:center;
+  font-size:0.95rem;
+}
+.picker-cards{
+  display:flex;
+  gap:24px;
+  max-width:620px;
+  width:100%;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.picker-card{
+  flex:1;min-width:240px;max-width:280px;
+  padding:40px 28px 32px;
+  border-radius:var(--radius);
+  background:#fff;
+  border:2px solid #e5e5e5;
+  cursor:pointer;
+  text-align:center;
+  transition:all .25s;
+}
+.picker-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.08)}
+.picker-card__icon{
+  font-size:2.8rem;
+  margin-bottom:16px;
+}
+.picker-card__title{
+  font-size:1.15rem;
+  font-weight:700;
+  margin-bottom:6px;
+}
+.picker-card__desc{
+  font-size:0.85rem;
+  color:#6e6e73;
+}
+.picker-card--hr:hover{border-color:#1e40af}
+.picker-card--visitor:hover{border-color:#0d9488}
+.picker-skip{
+  margin-top:32px;
+  font-size:0.85rem;
+  color:#8e8e93;
+  cursor:pointer;
+  background:none;border:none;
+  transition:color .2s;
+}
+.picker-skip:hover{color:#1d1d1f}
+
+/* ===== App Shell ===== */
+#app{display:none}
+#app.visible{display:block}
+
+/* ===== Header ===== */
+.header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  height:var(--nav-h);
+  background:rgba(255,255,255,.82);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid #e5e5e5;
+}
+.header .container{
+  display:flex;align-items:center;justify-content:space-between;height:100%;
+}
+.site-logo{
+  font-size:1.1rem;font-weight:700;color:#1d1d1f;
+  white-space:nowrap;
+}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{
+  color:#6e6e73;font-size:.88rem;transition:color .2s;
+  white-space:nowrap;
+}
+.nav-links a:hover,.nav-links a.active{color:var(--accent)}
+.switch-btn{
+  margin-left:8px;
+  background:none;border:1.5px solid #d2d2d7;
+  color:#6e6e73;font-size:.78rem;
+  padding:5px 12px;border-radius:20px;
+  cursor:pointer;transition:all .2s;
+  white-space:nowrap;
+}
+.switch-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ===== Sections ===== */
+.section{display:none;padding:80px 0}
+.section.active{display:block;animation:fadeUp .4s ease}
+.section--alt{background:#f5f5f7}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.section__title{
+  font-size:clamp(1.35rem,3.5vw,1.75rem);
+  font-weight:700;
+  margin-bottom:40px;
+  position:relative;
+  padding-bottom:14px;
+}
+.section__title::after{
+  content:'';position:absolute;bottom:0;left:0;
+  width:36px;height:3px;background:var(--accent);border-radius:2px;
+}
+
+/* ===== Hero Section ===== */
+.hero-section{
+  padding-top:calc(var(--nav-h) + 60px);
+  padding-bottom:48px;
+}
+.hero-grid{
+  display:flex;gap:40px;align-items:flex-start;
+}
+.hero-avatar{
+  flex-shrink:0;
+  width:120px;height:120px;border-radius:50%;
+  background:#e5e5e5;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.5rem;color:#b0b0b0;
+  overflow:hidden;
+}
+.hero-avatar img{width:100%;height:100%;object-fit:cover}
+.hero-text h1{
+  font-size:clamp(1.8rem,4.5vw,2.5rem);
+  font-weight:700;line-height:1.25;
+}
+.hero-text .tagline{
+  font-size:1.05rem;color:#6e6e73;
+  margin-top:8px;
+}
+.hero-tags{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;
+}
+.hero-tag{
+  padding:4px 14px;
+  border-radius:20px;
+  font-size:.82rem;
+  background:var(--accent-dim);
+  color:var(--accent);
+  border:1px solid var(--accent-light);
+}
+
+/* ===== Card List (Timeline replacement) ===== */
+.card-list{display:flex;flex-direction:column;gap:20px}
+.card-item{
+  background:#fff;
+  border-radius:var(--radius);
+  border:1px solid #e5e5e5;
+  padding:24px 28px;
+  transition:box-shadow .25s,transform .25s;
+  position:relative;
+  overflow:hidden;
+}
+.card-item::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;background:var(--accent);border-radius:0 2px 2px 0;
+}
+.card-item:hover{box-shadow:0 8px 24px rgba(0,0,0,.06);transform:translateY(-2px)}
+.card-item__header{
+  display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;
+}
+.card-item__header h3{font-size:1.05rem;font-weight:600}
+.card-item__header .meta{
+  font-size:.85rem;color:#6e6e73;
+}
+.card-item__body{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid #f0f0f0;
+  color:#4a4a50;
+  font-size:.9rem;
+  line-height:1.75;
+}
+.card-item__body ul{padding-left:18px}
+.card-item__body li{margin-bottom:4px}
+
+/* ===== Project Cards ===== */
+.project-cards{display:flex;flex-direction:column;gap:24px}
+.project-card{
+  background:#fff;
+  border-radius:var(--radius);
+  border:1px solid #e5e5e5;
+  padding:32px 32px 28px;
+  transition:box-shadow .25s,transform .25s;
+  position:relative;overflow:hidden;
+}
+.project-card:hover{box-shadow:0 8px 28px rgba(0,0,0,.07);transform:translateY(-2px)}
+.project-card--accent::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:4px;background:var(--accent);border-radius:0 2px 2px 0;
+}
+.project-card--tint{background:#fafbfc}
+.project-card__title{
+  font-size:1.3rem;font-weight:700;margin-bottom:6px;
+}
+.project-card__meta{
+  font-size:.82rem;color:#6e6e73;margin-bottom:10px;
+}
+.project-card__highlight{
+  font-size:.92rem;font-weight:600;color:#1d1d1f;
+  margin-bottom:14px;line-height:1.5;
+}
+.project-card__tags{
+  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;
+}
+.proj-tag{
+  padding:3px 12px;border-radius:20px;
+  font-size:.78rem;font-weight:500;
+  white-space:nowrap;
+}
+.proj-tag--frontend{background:#eff6ff;color:#1e40af}
+.proj-tag--backend{background:#f0fdf4;color:#166534}
+.proj-tag--database{background:#fff7ed;color:#c2410c}
+.proj-tag--ai{background:#faf5ff;color:#7e22ce}
+.proj-tag--tools{background:#fef2f2;color:#b91c1c}
+.proj-tag--lang{background:#fffbeb;color:#a16207}
+.proj-tag--other{background:#f5f5f7;color:#4a4a50}
+.project-card__details{
+  list-style:none;padding:0;
+}
+.project-card__details li{
+  font-size:.88rem;color:#4a4a50;line-height:1.7;
+  padding:2px 0 2px 18px;position:relative;
+}
+.project-card__details li::before{
+  content:'▸';position:absolute;left:0;top:2px;
+  color:var(--accent);font-size:.75rem;
+}
+.project-card__links{
+  display:flex;gap:16px;margin-top:18px;padding-top:16px;
+  border-top:1px solid #f0f0f0;
+}
+.project-card__links a{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:.85rem;color:#6e6e73;transition:color .2s;
+}
+.project-card__links a:hover{color:var(--accent)}
+.project-card__links a .link-icon{font-size:1rem}
+
+/* ===== Honor Grid ===== */
+.honor-divider{
+  font-size:1.05rem;font-weight:700;color:#1d1d1f;
+  margin:36px 0 20px;padding-top:24px;
+  border-top:1px solid #e5e5e5;
+}
+.honor-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:20px;
+}
+.honor-card{
+  background:#fff;
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  transition:transform .3s,box-shadow .3s;
+}
+.honor-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 28px rgba(0,0,0,.12);
+}
+.honor-card__img{
+  width:100%;height:200px;object-fit:cover;display:block;
+  background:#f5f5f7;
+}
+.honor-card__info{padding:14px 16px 16px;text-align:center}
+.honor-card__name{
+  font-size:.9rem;font-weight:600;color:#1d1d1f;line-height:1.4;
+}
+.honor-card__sub{
+  font-size:.78rem;color:#8e8e93;margin-top:4px;
+}
+
+/* ===== Cards Grid (articles) ===== */
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:20px;
+}
+.card{
+  background:#fff;
+  border-radius:var(--radius);
+  border:1px solid #e5e5e5;
+  padding:28px;
+  transition:box-shadow .25s,transform .25s;
+}
+.card:hover{box-shadow:0 8px 24px rgba(0,0,0,.06);transform:translateY(-2px)}
+.card h3{font-size:1.05rem;font-weight:600;margin-bottom:8px}
+.card .card-meta{font-size:.8rem;color:#8e8e93;margin-bottom:10px}
+.card p{font-size:.88rem;color:#4a4a50;line-height:1.65}
+.card .card-link{
+  display:inline-block;margin-top:12px;
+  font-size:.85rem;font-weight:500;
+}
+
+/* ===== Contact Cards ===== */
+.contact-cards{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:20px;
+}
+.contact-card{
+  display:flex;align-items:center;gap:16px;
+  padding:20px 24px;
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+  border:1px solid #f0f0f0;
+}
+.contact-card__icon{
+  width:48px;height:48px;
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;flex-shrink:0;
+}
+.contact-card__icon--blue{background:#eff6ff;color:#2563eb}
+.contact-card__icon--green{background:#f0fdf4;color:#16a34a}
+.contact-card__icon--red{background:#fef2f2;color:#dc2626}
+.contact-card__label{font-size:.82rem;color:#8e8e93;margin-bottom:2px}
+.contact-card__value{font-size:1.1rem;font-weight:600;color:#1d1d1f}
+
+/* ===== Download Btn ===== */
+.dl-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 28px;
+  border-radius:24px;
+  background:var(--accent);
+  color:#fff!important;
+  font-weight:600;
+  font-size:.9rem;
+  transition:opacity .2s;
+}
+.dl-btn:hover{opacity:.85}
+.dl-btn--placeholder{opacity:.5;pointer-events:none;cursor:not-allowed}
+
+/* ===== Footer ===== */
+.footer{
+  padding:28px 0;
+  border-top:1px solid #e5e5e5;
+  text-align:center;
+}
+.footer p{font-size:.82rem;color:#8e8e93}
+
+/* ===== Switch Modal ===== */
+.switch-modal{
+  position:fixed;inset:0;z-index:9998;
+  background:rgba(0,0,0,.35);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+}
+.switch-modal.hidden{display:none}
+.switch-modal__inner{
+  background:#fff;
+  border-radius:var(--radius);
+  padding:36px 32px;
+  max-width:540px;width:100%;
+  text-align:center;
+}
+.switch-modal__title{
+  font-size:1.2rem;font-weight:700;margin-bottom:24px;
+}
+.switch-modal__btns{
+  display:flex;gap:16px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+.switch-modal__btn{
+  flex:1;min-width:140px;max-width:200px;
+  padding:24px 20px;
+  border-radius:var(--radius);
+  border:2px solid #e5e5e5;
+  background:#fff;
+  cursor:pointer;
+  transition:all .2s;
+  font-family:var(--font);
+  font-size:.95rem;font-weight:600;
+}
+.switch-modal__btn:hover{transform:translateY(-2px)}
+.switch-modal__btn--hr:hover{border-color:#1e40af}
+.switch-modal__btn--visitor:hover{border-color:#0d9488}
+.switch-modal__cancel{
+  margin-top:20px;
+  background:none;border:none;
+  font-size:.85rem;color:#8e8e93;
+  cursor:pointer;
+}
+.switch-modal__cancel:hover{color:#1d1d1f}
+
+/* ===== Theme Overrides ===== */
+.theme-hr{--accent:#1e40af;--accent-light:#dbeafe;--accent-dim:#eff6ff}
+.theme-visitor{--accent:#0d9488;--accent-light:#ccfbf1;--accent-dim:#f0fdfa}
+
+/* ===== Responsive ===== */
+@media(max-width:640px){
+  .hero-grid{flex-direction:column;align-items:center;text-align:center}
+  .hero-avatar{width:96px;height:96px}
+  .hero-tags{justify-content:center}
+  .section__title::after{left:50%;transform:translateX(-50%)}
+  .section__title{text-align:center}
+  .nav-links{gap:10px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .nav-links a{font-size:.78rem}
+  .switch-btn{font-size:.7rem;padding:4px 8px;margin-left:4px}
+  .section{padding:48px 0}
+  .hero-section{padding-top:calc(var(--nav-h) + 36px)}
+  .picker-cards{flex-direction:column;align-items:center}
+  .picker-card{max-width:100%}
+  .contact-cards{grid-template-columns:1fr}
+  .card-grid{grid-template-columns:1fr}
+  .card-item{padding:20px}
+  .card-item__header{flex-direction:column;gap:4px}
+  .card-item__body{font-size:.85rem}
+  .card-item__body ul{padding-left:16px}
+  .card p{word-break:break-word}
+  .project-card{padding:22px 20px 20px}
+  .project-card__title{font-size:1.15rem}
+  .project-card__tags{gap:6px}
+  .proj-tag{font-size:.72rem;padding:2px 10px}
+  .project-card__links{flex-wrap:wrap;gap:12px}
+  .honor-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .honor-card__img{height:160px}
+  .honor-card__name{font-size:.82rem}
+}
+@media(max-width:400px){
+  .honor-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 身份选择遮罩 ===== -->
+<div id="picker-overlay" class="picker-overlay">
+  <h2 class="picker-title">你好，欢迎来访</h2>
+  <p class="picker-sub">请选择你的身份，我会为你展示更合适的内容</p>
+  <div class="picker-cards">
+    <!-- HR 卡片 -->
+    <div class="picker-card picker-card--hr" data-identity="hr">
+      <div class="picker-card__icon">💼</div>
+      <div class="picker-card__title">我是 HR / 招聘者</div>
+      <div class="picker-card__desc">查看职业履历、项目成果与专业技能</div>
+    </div>
+    <!-- 访客卡片 -->
+    <div class="picker-card picker-card--visitor" data-identity="visitor">
+      <div class="picker-card__icon">👋</div>
+      <div class="picker-card__title">我是同行 / 访客</div>
+      <div class="picker-card__desc">了解更多关于我的故事、兴趣与项目</div>
+    </div>
+  </div>
+  <button class="picker-skip" data-identity="general">随便看看，不选择</button>
+</div>
+
+<!-- ===== 主应用容器 ===== -->
+<div id="app">
+  <!-- 导航栏 -->
+  <header class="header">
+    <div class="container">
+      <a href="#" class="site-logo"><!-- JS fills --></a>
+      <div style="display:flex;align-items:center">
+        <nav class="nav-links" id="nav-links"><!-- JS fills --></nav>
+        <button class="switch-btn" id="switch-btn" title="切换身份">切换身份</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main id="site-content"><!-- JS fills --></main>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="container">
+      <p id="footer-text"><!-- JS fills --></p>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== 切换身份弹窗（复用） ===== -->
+<div id="switch-modal" class="switch-modal hidden">
+  <div class="switch-modal__inner">
+    <h3 class="switch-modal__title">切换身份</h3>
+    <div class="switch-modal__btns">
+      <button class="switch-modal__btn switch-modal__btn--hr" data-identity="hr">
+        <div style="font-size:1.8rem;margin-bottom:4px">💼</div>
+        HR / 招聘者
+      </button>
+      <button class="switch-modal__btn switch-modal__btn--visitor" data-identity="visitor">
+        <div style="font-size:1.8rem;margin-bottom:4px">👋</div>
+        同行 / 访客
+      </button>
+    </div>
+    <button class="switch-modal__cancel" id="modal-cancel">取消</button>
+  </div>
+</div>
+
+<script>
+// ===========================================================================
+// DATA LAYER — 所有内容在此集中管理，方便替换
+// ===========================================================================
+
+/** 个人信息（全局复用） */
+const INFO = {
+  name: '黄鹏',
+  enName: '',
+  photo: 'assets/hp.jpg',
+  resumePdf: '简历（HP).pdf', // ← 确认简历 PDF 文件名与此一致
+  hr: {
+    title: '全栈开发工程师 / 物联网工程在读',
+    tagline: '湖北工业大学工程技术学院物联网工程专业，具备全栈开发与 AI 算法应用经验。',
+    tags: ['Vue.js', 'SpringBoot', 'Java', 'MySQL', 'CNN', '团队协作'],
+    workEmail: '2686453213@qq.com', // ← 替换
+    linkedin: '', // ← 替换
+    phone: '18995958724',
+  },
+  visitor: {
+    title: '开发者 · 学生 · 竞赛爱好者',
+    tagline: '用代码构建产品，在竞赛中磨砺自己，保持对技术的好奇心。',
+    tags: ['全栈开发', 'AI 算法', '竞赛达人', '学生干部'],
+    email: '2686453213@qq.com', // ← 替换
+    github: 'https://github.com/realityHP', // ← 替换为 GitHub 主页
+    twitter: '', // ← 替换
+    wechat: 'iZLL1019', // ← 替换
+  },
+};
+
+/** 页面内容数据 */
+const CONTENT = {
+
+  // ======================== HR 视图 ========================
+  hr: {
+    nav: [
+      { id: 'profile-hr', label: '个人简介' },
+      { id: 'experience', label: '工作经历' },
+      { id: 'projects-hr', label: '项目成果' },
+      { id: 'education', label: '教育背景' },
+      { id: 'resume', label: '下载简历' },
+      { id: 'contact-hr', label: '联系方式' },
+    ],
+    sections: [
+      // --- 个人简介 ---
+      {
+        id: 'profile-hr', type: 'hero', alt: false,
+        html: `
+          <div class="hero-grid">
+            <div class="hero-avatar">
+              ${INFO.photo ? `<img src="${INFO.photo}" alt="${INFO.name}">` : '📷'}
+            </div>
+            <div class="hero-text">
+              <h1>${INFO.name}</h1>
+              <p class="tagline">${INFO.hr.title}</p>
+              <p class="tagline" style="font-size:.92rem">${INFO.hr.tagline}</p>
+              <div class="hero-tags">${INFO.hr.tags.map(t=>`<span class="hero-tag">${t}</span>`).join('')}</div>
+              <p style="font-weight:600;color:#1d1d1f;margin-top:20px;margin-bottom:8px;font-size:.88rem">主修课程：</p>
+              <div class="hero-tags">
+                ${['Java语言程序设计','C语言程序设计','Python语言程序设计','电路理论','模拟电子技术','数字电子技术','数据通信技术','单片机原理及接口技术','数据库原理及应用','云计算技术'].map(c=>`<span class="hero-tag">📘 ${c}</span>`).join('')}
+              </div>
+              <p style="font-weight:600;color:#1d1d1f;margin-top:20px;margin-bottom:6px;font-size:.88rem">自我评价：</p>
+              <p style="color:#4a4a50;font-size:.9rem;line-height:1.7">热爱运动与户外挑战，长期保持自律的生活节奏；性格阳光开朗，善于团队沟通与协作；对新知保持强烈好奇心，能快速学习新技术并投入实践。</p>
+            </div>
+          </div>`
+      },
+      // --- 工作经历 ---
+      {
+        id: 'experience', type: 'timeline', alt: true,
+        title: '工作经历',
+        items: [
+          {
+            header: '武汉市猿起科技有限公司',
+            meta: 'AIGC 内容策略优化 · 2023/06 – 2024/09',
+            tags: [{label:'AIGC',cat:'ai'},{label:'质量评估',cat:'tools'},{label:'数据标注',cat:'other'}],
+            body: `
+              <ul>
+                <li>负责对 AI 生成的作业答案进行<strong>准确性判断与质量评估</strong>，确保回答内容的准确、可靠与合规</li>
+                <li>基于评估结果持续为 AI 系统的优化迭代提供<strong>关键反馈</strong>，支撑 AIGC 策略的改进与效果提升</li>
+                <li>深入理解 AI 内容生成流程，积累了人工智能产品<strong>质量保障</strong>的实战经验</li>
+              </ul>`,
+            open: true,
+          },
+          {
+            header: '广水市档案局',
+            meta: '档案整理实习生 · 2022.07 – 2022.09',
+            tags: [{label:'档案数字化',cat:'backend'},{label:'数据治理',cat:'database'},{label:'文档管理',cat:'other'}],
+            body: `
+              <p style="font-weight:600;color:#1d1d1f;margin-bottom:12px">📋 主导退伍军人档案数字化项目，确保信息录入零差错与高效流转</p>
+              <ul style="list-style:none;padding:0">
+                <li style="padding:2px 0 2px 18px;position:relative;font-size:.88rem;color:#4a4a50;line-height:1.7">
+                  <span style="position:absolute;left:0;color:var(--accent);font-size:.75rem">▸</span>
+                  使用电子档案管理系统完成纸质档案的数字化录入与校对，日均处理档案量提升 <strong>20%</strong>
+                </li>
+                <li style="padding:2px 0 2px 18px;position:relative;font-size:.88rem;color:#4a4a50;line-height:1.7">
+                  <span style="position:absolute;left:0;color:var(--accent);font-size:.75rem">▸</span>
+                  制定分类归档标准，对海量退伍军人档案进行专业分类、编号与整理，实现快速检索
+                </li>
+                <li style="padding:2px 0 2px 18px;position:relative;font-size:.88rem;color:#4a4a50;line-height:1.7">
+                  <span style="position:absolute;left:0;color:var(--accent);font-size:.75rem">▸</span>
+                  建立信息校验流程，保证录入数据的准确性、一致性和可追溯性，降低后续纠错成本
+                </li>
+                <li style="padding:2px 0 2px 18px;position:relative;font-size:.88rem;color:#4a4a50;line-height:1.7">
+                  <span style="position:absolute;left:0;color:var(--accent);font-size:.75rem">▸</span>
+                  在连续高强度工作中保持高度细心与耐心，磨炼出优秀的文档管理与数据治理能力
+                </li>
+              </ul>`,
+            open: true,
+          },
+        ],
+      },
+      // --- 项目成果 ---
+      {
+        id: 'projects-hr', type: 'projects', alt: false,
+        title: '项目成果',
+        items: [
+          {
+            title: '农产品销售系统',
+            meta: '2023/06 – 2026/04 · 独立开发负责人',
+            highlight: '从零设计并实现全栈电商平台，覆盖买家/卖家/管理员三端，日均处理数百笔模拟订单',
+            tags: [
+              { label: 'Vue3', cat: 'frontend' },
+              { label: 'SpringBoot3', cat: 'backend' },
+              { label: 'MySQL', cat: 'database' },
+              { label: 'Redis', cat: 'database' },
+              { label: 'JWT', cat: 'tools' },
+            ],
+            details: [
+              '完成前后端分离架构设计，设计 MySQL 表结构（用户、商品、订单、评价）并建立索引优化查询',
+              '集成 MyBatis-Plus 简化数据访问层，利用 Redis 缓存热点商品数据，降低数据库响应时间',
+              '实现订单状态机管理和模拟支付流程，支持物流追踪与后台数据可视化统计',
+            ],
+            demoLink: '', // ← 演示链接
+            sourceLink: '', // ← 源码链接
+            variant: 'accent',
+          },
+          {
+            title: '自动化损伤定位补漆机器人',
+            meta: '2022/09 – 2023/09 · 软件开发者',
+            highlight: '攻克传统人工识别剐蹭效率低、误差大的痛点，实现补漆全流程自动化',
+            tags: [
+              { label: 'CNN', cat: 'ai' },
+              { label: '3D 建模', cat: 'ai' },
+              { label: '轨迹规划', cat: 'ai' },
+              { label: '自动化', cat: 'tools' },
+            ],
+            details: [
+              '利用汽车曲面特征 3D 建模，完成剐蹭损伤范围提取与车漆自动调色',
+              '设计并应用卷积神经网络算法，替代传统人工识别，提升检测精度与效率',
+              '实现补漆轨迹自动规划和补漆质量检测功能，为补漆机器人提供核心技术保障',
+            ],
+            demoLink: '', // ← 演示链接
+            sourceLink: '', // ← 源码链接
+            variant: 'tint',
+          },
+        ],
+      },
+      // --- 教育背景 ---
+      {
+        id: 'education', type: 'timeline', alt: true,
+        title: '教育背景 & 荣誉',
+        items: [
+          {
+            header: '湖北工业大学工程技术学院',
+            meta: '物联网工程 · 全日制本科 · 2022/09 – 2026/06',
+            body: '<p>主修物联网工程专业，系统学习了嵌入式系统、传感器技术、计算机网络、数据库等课程。在校期间积极参与学科竞赛与创新创业项目，将理论知识与工程实践相结合。</p>',
+            open: true,
+          },
+          {
+            header: '获奖经历',
+            meta: '2023 – 2024',
+            body: `
+              <ul>
+                <li>中国国际大学生创新大赛（创意组）<strong>湖北省银奖</strong>（2023.09 — 2024.06）</li>
+                <li>第十三届"挑战杯"大学生创新创业竞赛 <strong>湖北省铜奖</strong>（2023.09 — 2024.06）</li>
+                <li><strong>2023 年校级优秀干部</strong></li>
+                <li><strong>2023 年校级一等奖学金</strong></li>
+              </ul>`,
+            open: true,
+          },
+          {
+            header: '学生工作经历',
+            meta: '2022 – 2023',
+            tags: [{label:'赛事组织部部长',cat:'frontend'},{label:'学生干部',cat:'tools'}],
+            body: `
+              <p style="font-weight:600;color:#1d1d1f;margin-bottom:12px">📋 统筹多项校级创新创业赛事，优化赛事流程与评审标准，为全院学生搭建科创平台</p>
+              <ul style="list-style:none;padding:0">
+                <li style="padding:2px 0 2px 18px;position:relative;font-size:.88rem;color:#4a4a50;line-height:1.7">
+                  <span style="position:absolute;left:0;color:var(--accent);font-size:.75rem">▸</span>
+                  跟随举办多次"大挑"与"小挑"院赛赛前筹备工作，建立赛事评审标准，优化比赛流程，提高活动效率 <strong>30%</strong>
+                </li>
+                <li style="padding:2px 0 2px 18px;position:relative;font-size:.88rem;color:#4a4a50;line-height:1.7">
+                  <span style="position:absolute;left:0;color:var(--accent);font-size:.75rem">▸</span>
+                  运动会期间组织趣味体育活动，加深组织凝聚力，协调多部门合作，确保活动顺利进行
+                </li>
+                <li style="padding:2px 0 2px 18px;position:relative;font-size:.88rem;color:#4a4a50;line-height:1.7">
+                  <span style="position:absolute;left:0;color:var(--accent);font-size:.75rem">▸</span>
+                  以主要负责人身份举办青年创新发展中心竞赛交流分享会，并作为代表分享竞赛经验与心得
+                </li>
+                <li style="padding:2px 0 2px 18px;position:relative;font-size:.88rem;color:#4a4a50;line-height:1.7">
+                  <span style="position:absolute;left:0;color:var(--accent);font-size:.75rem">▸</span>
+                  互联网+暑假期间留校负责参赛团队的全流程服务工作，保障备赛与参赛需求
+                </li>
+              </ul>`,
+            open: true,
+          },
+        ],
+        honorItems: [
+          // ★ 文件名需与 honor/ 文件夹中的实际文件一致
+          { file: '精准触达省赛银奖.png',              name: '中国国际大学生创新大赛湖北省银奖', sub: '创意组 · 2023.09 — 2024.06' },
+          { file: '第十三届挑战杯 铜奖.jpg',            name: '第十三届"挑战杯"大学生创新创业竞赛湖北省铜奖', sub: '2023.09 — 2024.06' },
+          { file: '一等奖学金.jpg',                    name: '2023 年校级一等奖学金', sub: '湖北工业大学工程技术学院' },
+          { file: '补漆院赛金奖.png',                  name: '补漆院赛金奖', sub: '院级 · 2024' },
+          { file: '精准触达院赛金奖(赛道2）.png',        name: '精准触达院赛金奖（赛道2）', sub: '院级 · 2024' },
+          { file: '创星杯院奖金奖.png',                name: '创星杯院奖金奖', sub: '院级 · 2024' },
+          { file: '果园智能喷雾机器人院赛铜奖.png',      name: '果园智能喷雾机器人院赛铜奖', sub: '院级 · 2024' },
+        ],
+      },
+      // --- 下载简历 ---
+      {
+        id: 'resume', type: 'text', alt: false,
+        title: '下载简历',
+        html: `
+          <p style="margin-bottom:16px;color:#6e6e73">如需详细的 PDF 简历，请点击下方按钮下载。</p>
+          ${INFO.resumePdf
+            ? `<a class="dl-btn" href="${INFO.resumePdf}" download>📄 下载简历 PDF</a>`
+            : `<span class="dl-btn dl-btn--placeholder">📄 下载简历 PDF（即将上线）</span>`}
+        `,
+      },
+      // --- 联系方式 ---
+      {
+        id: 'contact-hr', type: 'text', alt: true,
+        title: '联系方式',
+        html: `
+          <div class="contact-cards">
+            <div class="contact-card">
+              <div class="contact-card__icon contact-card__icon--blue">✉️</div>
+              <div><div class="contact-card__label">邮箱</div><div class="contact-card__value">${INFO.hr.workEmail}</div></div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-card__icon contact-card__icon--green">📞</div>
+              <div><div class="contact-card__label">电话</div><div class="contact-card__value">${INFO.hr.phone}</div></div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-card__icon contact-card__icon--green">💬</div>
+              <div><div class="contact-card__label">微信</div><div class="contact-card__value">${INFO.visitor.wechat}</div></div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-card__icon contact-card__icon--red">📍</div>
+              <div><div class="contact-card__label">所在地</div><div class="contact-card__value">湖北省武汉市洪山区</div></div>
+            </div>
+          </div>`,
+      },
+    ],
+  },
+
+  // ======================== 访客视图 ========================
+  visitor: {
+    nav: [
+      { id: 'about', label: '关于我' },
+      { id: 'articles', label: '文章' },
+      { id: 'projects-visitor', label: '项目作品' },
+      { id: 'talks', label: '演讲' },
+      { id: 'contact-visitor', label: '联系我' },
+    ],
+    sections: [
+      // --- 关于我 ---
+      {
+        id: 'about', type: 'hero', alt: false,
+        html: `
+          <div class="hero-grid">
+            <div class="hero-avatar">
+              ${INFO.photo ? `<img src="${INFO.photo}" alt="${INFO.name}">` : '📷'}
+            </div>
+            <div class="hero-text">
+              <h1>${INFO.name}</h1>
+              <p class="tagline">${INFO.visitor.title}</p>
+              <p class="tagline" style="font-size:.92rem">${INFO.visitor.tagline}</p>
+              <div class="hero-tags">${INFO.visitor.tags.map(t=>`<span class="hero-tag">${t}</span>`).join('')}</div>
+              <p style="font-weight:600;color:#1d1d1f;margin-top:20px;margin-bottom:8px;font-size:.88rem">主修课程：</p>
+              <div class="hero-tags">
+                ${['Java语言程序设计','C语言程序设计','Python语言程序设计','电路理论','模拟电子技术','数字电子技术','数据通信技术','单片机原理及接口技术','数据库原理及应用','云计算技术'].map(c=>`<span class="hero-tag">📘 ${c}</span>`).join('')}
+              </div>
+              <p style="font-weight:600;color:#1d1d1f;margin-top:20px;margin-bottom:6px;font-size:.88rem">自我评价：</p>
+              <p style="color:#4a4a50;font-size:.9rem;line-height:1.7">热爱运动与户外挑战，长期保持自律的生活节奏；性格阳光开朗，善于团队沟通与协作；对新知保持强烈好奇心，能快速学习新技术并投入实践。</p>
+            </div>
+          </div>`
+      },
+      // --- 关于我更多 ---
+      {
+        id: 'about-more', type: 'text', alt: true,
+        title: '更多关于我',
+        html: `
+          <p style="margin-bottom:12px">👋 你好！我是黄鹏，目前就读于<strong>湖北工业大学工程技术学院</strong>物联网工程专业，预计 2026 年毕业。</p>
+          <p style="margin-bottom:12px">我对技术充满热情，从大一开始就投入到项目开发中。技术栈涵盖<strong>Vue.js、SpringBoot、MySQL</strong>等全栈工具，也涉足过 <strong>CNN 卷积神经网络</strong>在工业检测场景的应用。我相信好的工程师不仅要能写代码，更要能理解业务、解决问题。</p>
+          <p style="margin-bottom:12px">在校期间我积极参加了多项学科竞赛，获得了<strong>中国国际大学生创新大赛湖北省银奖</strong>和<strong>"挑战杯"湖北省铜奖</strong>。作为青年创新发展中心赛事组织部部长，我组织过多场竞赛分享活动，帮助更多同学参与到创新创业中来。</p>
+          <p>课余时间我喜欢钻研新技术，最近对 AI 与物联网的交叉领域特别感兴趣。希望在毕业前能做出更多有影响力的作品。🚀</p>`,
+      },
+      // --- 文章 ---
+      {
+        id: 'articles', type: 'cards', alt: false,
+        title: '文章',
+        items: [
+          {
+            title: '从零搭建一个前后端分离的电商系统',
+            meta: '2024/03 · 技术分享',
+            tags: [{label:'SpringBoot3',cat:'backend'},{label:'Vue3',cat:'frontend'},{label:'MySQL',cat:'database'}],
+            body: '<p>以农产品销售系统为例，分享 SpringBoot3 + Vue3 全栈项目的架构设计、数据库建模与性能优化经验。</p>',
+          },
+          {
+            title: 'CNN 在工业视觉检测中的应用实践',
+            meta: '2023/11 · 技术博客',
+            tags: [{label:'CNN',cat:'ai'},{label:'工业视觉',cat:'ai'},{label:'3D建模',cat:'ai'}],
+            body: '<p>以补漆机器人项目为背景，介绍卷积神经网络如何替代传统人工识别，实现自动化损伤检测。</p>',
+          },
+          {
+            title: '大学生竞赛备赛指南：从选题到路演',
+            meta: '2023/12 · 经验分享',
+            tags: [{label:'竞赛',cat:'other'},{label:'路演',cat:'tools'},{label:'团队',cat:'lang'}],
+            body: '<p>结合"挑战杯"和"互联网+"的参赛经历，分享如何选题、组队、准备材料以及路演答辩技巧。</p>',
+          },
+        ],
+      },
+      // --- 项目作品 ---
+      {
+        id: 'projects-visitor', type: 'projects', alt: true,
+        title: '项目作品 & 开源',
+        items: [
+          {
+            title: '农产品销售系统',
+            meta: '全栈项目 · 独立开发 · 2023/06 – 2026/04',
+            highlight: '从零设计并实现全栈电商平台，覆盖买家/卖家/管理员三端，核心功能完备',
+            tags: [
+              { label: 'Vue3', cat: 'frontend' },
+              { label: 'SpringBoot3', cat: 'backend' },
+              { label: 'MySQL', cat: 'database' },
+              { label: 'Redis', cat: 'database' },
+            ],
+            details: [
+              '前后端分离架构，面向买家/卖家/管理员三类用户的完整电商系统',
+              '商品发布与搜索、购物车、订单状态流转、模拟支付、物流追踪全覆盖',
+              'MySQL 索引优化 + Redis 热点缓存，保障查询性能',
+            ],
+            demoLink: '',
+            sourceLink: INFO.visitor.github,
+            variant: 'accent',
+          },
+          {
+            title: '自动化损伤定位补漆机器人',
+            meta: 'AI + 工业自动化 · 2022/09 – 2023/09',
+            highlight: 'CNN 算法攻克传统人工识别痛点，实现剐蹭检测与补漆全流程自动化',
+            tags: [
+              { label: 'CNN', cat: 'ai' },
+              { label: '3D 建模', cat: 'ai' },
+              { label: '轨迹规划', cat: 'ai' },
+              { label: 'Python', cat: 'lang' },
+            ],
+            details: [
+              '汽车曲面 3D 建模 + 剐蹭损伤范围提取 + 车漆自动调色',
+              'CNN 算法设计应用，替代传统人工识别，提升检测精度与效率',
+              '补漆轨迹自动规划和质量检测，为机器人自动化作业提供核心技术支撑',
+            ],
+            demoLink: '',
+            sourceLink: INFO.visitor.github,
+            variant: 'tint',
+          },
+          {
+            title: 'AIGC 内容质量评估项目',
+            meta: '实习项目 · 2023/06 – 2024/09',
+            highlight: '负责 AI 生成内容的质量评估与反馈优化，支撑 AIGC 策略改进',
+            tags: [
+              { label: 'AI 评估', cat: 'ai' },
+              { label: '数据分析', cat: 'other' },
+              { label: '质量控制', cat: 'tools' },
+            ],
+            details: [
+              '对 AI 生成的作业答案进行准确性判断与质量评估，确保内容准确可靠合规',
+              '持续为 AI 系统优化迭代提供关键反馈，支撑 AIGC 策略的改进与效果提升',
+            ],
+            demoLink: '',
+            sourceLink: '',
+            variant: 'accent',
+          },
+        ],
+      },
+      // --- 演讲 & 竞赛 ---
+      {
+        id: 'talks', type: 'timeline', alt: false,
+        title: '竞赛 & 校园经历',
+        items: [
+          {
+            header: '中国国际大学生创新大赛（创意组）',
+            meta: '湖北省银奖 · 2023.09 – 2024.06',
+            body: '<p>参赛项目在创意组赛道中获得省级银奖，全过程参与了项目选题、方案设计、原型开发与路演答辩。</p>',
+            open: true,
+          },
+          {
+            header: '第十三届"挑战杯"大学生创新创业竞赛',
+            meta: '湖北省铜奖 · 2023.09 – 2024.06',
+            body: '<p>作为团队核心成员参与项目策划与技术开发，最终获得省级铜奖。</p>',
+            open: true,
+          },
+          {
+            header: '青年创新发展中心 赛事组织部部长',
+            meta: '2022.09 – 2023.06',
+            body: '<p>负责"大挑""小挑"等创新创业赛事院级赛前筹备，搭建赛事评审体系、优化比赛流程。举办竞赛交流分享会，面向全院学生分享竞赛经验与备赛思路，营造校园科创氛围。</p>',
+            open: true,
+          },
+          {
+            header: '暑期留校"互联网+"大赛服务负责人',
+            meta: '2023 暑期',
+            body: '<p>全程保障参赛团队备赛与参赛需求，为多支参赛团队提供赛事服务与后勤支持。</p>',
+            open: true,
+          },
+        ],
+        honorItems: [
+          { file: '精准触达省赛银奖.png',              name: '中国国际大学生创新大赛湖北省银奖', sub: '创意组 · 2023.09 — 2024.06' },
+          { file: '第十三届挑战杯 铜奖.jpg',            name: '第十三届"挑战杯"大学生创新创业竞赛湖北省铜奖', sub: '2023.09 — 2024.06' },
+          { file: '一等奖学金.jpg',                    name: '2023 年校级一等奖学金', sub: '湖北工业大学工程技术学院' },
+          { file: '补漆院赛金奖.png',                  name: '补漆院赛金奖', sub: '院级 · 2024' },
+          { file: '精准触达院赛金奖(赛道2）.png',        name: '精准触达院赛金奖（赛道2）', sub: '院级 · 2024' },
+          { file: '创星杯院奖金奖.png',                name: '创星杯院奖金奖', sub: '院级 · 2024' },
+          { file: '果园智能喷雾机器人院赛铜奖.png',      name: '果园智能喷雾机器人院赛铜奖', sub: '院级 · 2024' },
+        ],
+      },
+      // --- 联系 ---
+      {
+        id: 'contact-visitor', type: 'text', alt: true,
+        title: '联系我',
+        html: `
+          <div class="contact-cards">
+            <div class="contact-card">
+              <div class="contact-card__icon contact-card__icon--blue">✉️</div>
+              <div><div class="contact-card__label">邮箱</div><div class="contact-card__value">${INFO.visitor.email}</div></div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-card__icon contact-card__icon--green">📞</div>
+              <div><div class="contact-card__label">电话</div><div class="contact-card__value">${INFO.hr.phone}</div></div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-card__icon contact-card__icon--green">💬</div>
+              <div><div class="contact-card__label">微信</div><div class="contact-card__value">${INFO.visitor.wechat}</div></div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-card__icon contact-card__icon--red">📍</div>
+              <div><div class="contact-card__label">所在地</div><div class="contact-card__value">湖北省武汉市洪山区</div></div>
+            </div>
+          </div>`,
+      },
+    ],
+  },
+};
+
+// ===========================================================================
+// STATE MANAGEMENT
+// ===========================================================================
+const STORAGE_KEY = 'site-identity';
+
+function getStoredIdentity() {
+  try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+}
+function setStoredIdentity(id) {
+  try { localStorage.setItem(STORAGE_KEY, id); } catch { /* noop */ }
+}
+
+let currentIdentity = null; // 'hr' | 'visitor' | 'general'
+
+// ===========================================================================
+// RENDER
+// ===========================================================================
+
+/** 获取当前 identity 对应的数据 key（general 降级到 visitor） */
+function getDataKey() {
+  return currentIdentity === 'hr' ? 'hr' : 'visitor';
+}
+
+/** 设置主题色 class */
+function setTheme(id) {
+  const cls = document.documentElement.classList;
+  cls.remove('theme-hr', 'theme-visitor');
+  if (id === 'hr') cls.add('theme-hr');
+  else cls.add('theme-visitor');
+}
+
+/** 渲染导航链接 */
+function renderNav(data) {
+  const container = document.getElementById('nav-links');
+  container.innerHTML = data.nav.map(item =>
+    `<a href="#${item.id}" data-nav="${item.id}">${item.label}</a>`
+  ).join('');
+}
+
+/** 渲染主内容区 */
+function renderSections(data) {
+  const main = document.getElementById('site-content');
+  let html = '';
+
+  data.sections.forEach(sec => {
+    const altClass = sec.alt ? ' section--alt' : '';
+    html += `<section id="${sec.id}" class="section${altClass}"><div class="container">`;
+
+    if (sec.title) {
+      html += `<h2 class="section__title">${sec.title}</h2>`;
+    }
+
+    switch (sec.type) {
+      case 'hero':
+        html += sec.html;
+        break;
+      case 'timeline':
+        html += renderTimeline(sec.items);
+        if (sec.honorItems && sec.honorItems.length) {
+          html += '<div class="honor-divider">🏆 荣誉与奖项</div>';
+          html += renderHonors(sec.honorItems);
+        }
+        break;
+      case 'projects':
+        html += renderProjects(sec.items);
+        break;
+      case 'cards':
+        html += renderCards(sec.items);
+        break;
+      case 'text':
+        html += sec.html;
+        break;
+    }
+
+    html += '</div></section>';
+  });
+
+  main.innerHTML = html;
+}
+
+function renderTimeline(items) {
+  let html = '<div class="card-list">';
+  items.forEach((item, i) => {
+    html += `
+      <div class="card-item">
+        <div class="card-item__header">
+          <h3>${item.header}</h3>
+          <span class="meta">${item.meta}</span>
+        </div>
+        <div class="card-item__body">
+          ${item.tags ? `<div class="project-card__tags" style="margin-bottom:10px">${item.tags.map(t=>`<span class="proj-tag proj-tag--${t.cat}">${t.label}</span>`).join('')}</div>` : ''}
+          ${item.body}
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderCards(items) {
+  let html = '<div class="card-grid">';
+  items.forEach(item => {
+    html += `
+      <div class="card">
+        <h3>${item.title}</h3>
+        <div class="card-meta">${item.meta}</div>
+        ${item.tags ? `<div class="project-card__tags" style="margin-bottom:12px">${item.tags.map(t=>`<span class="proj-tag proj-tag--${t.cat}">${t.label}</span>`).join('')}</div>` : ''}
+        ${item.body}
+        ${item.link ? `<a class="card-link" href="${item.link}" target="_blank">查看项目 →</a>` : ''}
+      </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderProjects(items) {
+  let html = '<div class="project-cards">';
+  items.forEach(item => {
+    const v = item.variant === 'tint' ? ' project-card--tint' : ' project-card--accent';
+    html += `<div class="project-card${v}">`;
+    html += `<h3 class="project-card__title">${item.title}</h3>`;
+    html += `<div class="project-card__meta">${item.meta}</div>`;
+    html += `<p class="project-card__highlight">${item.highlight}</p>`;
+    if (item.tags && item.tags.length) {
+      html += '<div class="project-card__tags">';
+      item.tags.forEach(t => {
+        html += `<span class="proj-tag proj-tag--${t.cat}">${t.label}</span>`;
+      });
+      html += '</div>';
+    }
+    if (item.details && item.details.length) {
+      html += '<ul class="project-card__details">';
+      item.details.forEach(d => {
+        html += `<li>${d}</li>`;
+      });
+      html += '</ul>';
+    }
+    if (item.demoLink !== undefined || item.sourceLink !== undefined) {
+      html += '<div class="project-card__links">';
+      if (item.demoLink) {
+        html += `<a href="${item.demoLink}" target="_blank"><span class="link-icon">🔗</span> 在线演示</a>`;
+      } else if (item.demoLink === '') {
+        html += `<a style="opacity:.4;cursor:not-allowed"><span class="link-icon">🔗</span> 演示（即将上线）</a>`;
+      }
+      if (item.sourceLink) {
+        html += `<a href="${item.sourceLink}" target="_blank"><span class="link-icon">📂</span> 源代码</a>`;
+      } else if (item.sourceLink === '') {
+        html += `<a style="opacity:.4;cursor:not-allowed"><span class="link-icon">📂</span> 源码（即将上线）</a>`;
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderHonors(items) {
+  let html = '<div class="honor-grid">';
+  items.forEach(item => {
+    const src = `honor/${item.file}`;
+    html += `
+      <div class="honor-card">
+        <img class="honor-card__img" src="${src}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">
+        <div class="honor-card__info">
+          <div class="honor-card__name">${item.name}</div>
+          ${item.sub ? `<div class="honor-card__sub">${item.sub}</div>` : ''}
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+/** 渲染页脚 */
+function renderFooter() {
+  const year = new Date().getFullYear();
+  document.getElementById('footer-text').textContent =
+    `© ${year} ${INFO.name}. All rights reserved.`;
+}
+
+/** 全量渲染视图 */
+function renderView(identity) {
+  currentIdentity = identity;
+  const dataKey = getDataKey();
+  const data = CONTENT[dataKey];
+
+  setTheme(identity);
+  renderNav(data);
+  renderSections(data);
+  renderFooter();
+
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('picker-overlay').classList.add('hidden');
+  document.querySelector('.site-logo').textContent = INFO.name;
+
+  // 滚动到顶部
+  window.scrollTo(0, 0);
+
+  // 绑定导航Tab切换
+  bindNavTabs();
+}
+
+// ===========================================================================
+// IDENTITY SWITCH LOGIC
+// ===========================================================================
+
+/** 显示身份选择遮罩（首次进入） */
+function showPicker() {
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('picker-overlay').classList.remove('hidden');
+  document.getElementById('switch-modal').classList.add('hidden');
+}
+
+/** 显示切换弹窗（已进入网站后切换） */
+function showSwitchModal() {
+  document.getElementById('switch-modal').classList.remove('hidden');
+}
+
+/** 隐藏切换弹窗 */
+function hideSwitchModal() {
+  document.getElementById('switch-modal').classList.add('hidden');
+}
+
+/** 选择身份 */
+function selectIdentity(identity) {
+  setStoredIdentity(identity);
+  renderView(identity);
+  hideSwitchModal();
+}
+
+// ===========================================================================
+// NAV TABS — 单板块切换
+// ===========================================================================
+
+function bindNavTabs() {
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const headerH = document.querySelector('.header').offsetHeight;
+
+  // 默认显示第一个板块
+  function showFirst() {
+    if (sections.length === 0) return;
+    sections.forEach(s => s.classList.remove('active'));
+    sections[0].classList.add('active');
+    navLinks.forEach(l => l.classList.remove('active'));
+    if (navLinks[0]) navLinks[0].classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  showFirst();
+
+  // 导航点击切换
+  navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const id = this.getAttribute('href').slice(1);
+      const target = document.getElementById(id);
+      if (!target || target.classList.contains('active')) return;
+
+      // 隐藏所有，显示目标
+      sections.forEach(s => s.classList.remove('active'));
+      target.classList.add('active');
+
+      // 高亮当前导航
+      navLinks.forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+
+      // 滚动到板块顶部
+      const top = target.offsetTop - headerH - 20;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    });
+  });
+}
+
+// ===========================================================================
+// EVENT BINDINGS
+// ===========================================================================
+
+// 身份选择遮罩中的卡片点击
+document.querySelectorAll('.picker-card').forEach(card => {
+  card.addEventListener('click', () => selectIdentity(card.dataset.identity));
+});
+
+// 身份选择遮罩中的"随便看看"按钮
+document.querySelector('.picker-skip').addEventListener('click', () => {
+  selectIdentity('general');
+});
+
+// 导航栏切换身份按钮
+document.getElementById('switch-btn').addEventListener('click', showSwitchModal);
+
+// 切换弹窗中的身份卡片点击
+document.querySelectorAll('.switch-modal__btn').forEach(btn => {
+  btn.addEventListener('click', () => selectIdentity(btn.dataset.identity));
+});
+
+// 切换弹窗取消
+document.getElementById('modal-cancel').addEventListener('click', hideSwitchModal);
+
+// 点击弹窗遮罩关闭
+document.getElementById('switch-modal').addEventListener('click', function(e) {
+  if (e.target === this) hideSwitchModal();
+});
+
+// ===========================================================================
+// INIT
+// ===========================================================================
+
+(function init() {
+  const stored = getStoredIdentity();
+  if (stored && (stored === 'hr' || stored === 'visitor' || stored === 'general')) {
+    renderView(stored);
+  } else {
+    showPicker();
+  }
+})();
+</script>
+</body>
+</html>
