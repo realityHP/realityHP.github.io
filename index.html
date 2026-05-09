@@ -1147,7 +1147,7 @@ function renderHonors(items) {
     const src = `honor/${item.file}`;
     html += `
       <div class="honor-card">
-        <img class="honor-card__img" src="${src}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">
+        <img class="honor-card__img" src="${src}" alt="${item.name}">
         <div class="honor-card__info">
           <div class="honor-card__name">${item.name}</div>
           ${item.sub ? `<div class="honor-card__sub">${item.sub}</div>` : ''}
@@ -1171,12 +1171,14 @@ function renderView(identity) {
   const dataKey = getDataKey();
   const data = CONTENT[dataKey];
 
+  // 先让 #app 可见，再注入内容——否则 display:none 容器中的图片可能不被浏览器解码
+  document.getElementById('app').classList.add('visible');
+
   setTheme(identity);
   renderNav(data);
   renderSections(data);
   renderFooter();
 
-  document.getElementById('app').classList.add('visible');
   document.getElementById('picker-overlay').classList.add('hidden');
   document.querySelector('.site-logo').textContent = INFO.name;
 
