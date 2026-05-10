@@ -129,8 +129,7 @@ img{max-width:100%;display:block}
 .switch-btn:hover{border-color:var(--accent);color:var(--accent)}
 
 /* ===== Sections ===== */
-.section{overflow:hidden;height:0;opacity:0}
-.section.active{overflow:visible;height:auto;opacity:1;padding-top:80px;padding-bottom:80px;animation:fadeUp .4s ease}
+.section{padding-top:80px;padding-bottom:80px;animation:fadeUp .4s ease}
 .section--alt{background:#f5f5f7}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .section__title{
@@ -442,7 +441,7 @@ img{max-width:100%;display:block}
   .nav-links{gap:10px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
   .nav-links a{font-size:.78rem}
   .switch-btn{font-size:.7rem;padding:4px 8px;margin-left:4px}
-  .section.active{padding-top:48px;padding-bottom:48px}
+  .section{padding-top:48px;padding-bottom:48px}
   .section.hero-section{padding-top:calc(var(--nav-h) + 36px)}
   .picker-cards{flex-direction:column;align-items:center}
   .picker-card{max-width:100%}
@@ -997,6 +996,7 @@ function setStoredIdentity(id) {
 }
 
 let currentIdentity = null; // 'hr' | 'visitor' | 'general'
+let sectionCache = {};        // 按需渲染缓存：{ id: { html, altClass, heroClass } }
 
 // ===========================================================================
 // RENDER
@@ -1023,45 +1023,55 @@ function renderNav(data) {
   ).join('');
 }
 
-/** 渲染主内容区 */
+/** 渲染主内容区 — 构建缓存，仅注入当前 section（确保图片在可见容器中加载） */
 function renderSections(data) {
-  const main = document.getElementById('site-content');
-  let html = '';
-
+  sectionCache = {};
   data.sections.forEach(sec => {
-    const altClass = sec.alt ? ' section--alt' : '';
-    html += `<section id="${sec.id}" class="section${altClass}"><div class="container">`;
-
-    if (sec.title) {
-      html += `<h2 class="section__title">${sec.title}</h2>`;
-    }
-
+    let inner = '';
+    if (sec.title) inner += `<h2 class="section__title">${sec.title}</h2>`;
     switch (sec.type) {
       case 'hero':
-        html += sec.html;
+        inner += sec.html;
         break;
       case 'timeline':
-        html += renderTimeline(sec.items);
+        inner += renderTimeline(sec.items);
         if (sec.honorItems && sec.honorItems.length) {
-          html += '<div class="honor-divider">🏆 荣誉与奖项</div>';
-          html += renderHonors(sec.honorItems);
+          inner += '<div class="honor-divider">🏆 荣誉与奖项</div>';
+          inner += renderHonors(sec.honorItems);
         }
         break;
       case 'projects':
-        html += renderProjects(sec.items);
+        inner += renderProjects(sec.items);
         break;
       case 'cards':
-        html += renderCards(sec.items);
+        inner += renderCards(sec.items);
         break;
       case 'text':
-        html += sec.html;
+        inner += sec.html;
         break;
     }
-
-    html += '</div></section>';
+    sectionCache[sec.id] = {
+      inner,
+      altClass: sec.alt ? ' section--alt' : '',
+      heroClass: sec.type === 'hero' ? ' hero-section' : ''
+    };
   });
 
-  main.innerHTML = html;
+  // 只渲染第一个 section 到 DOM
+  showSection(data.sections[0].id);
+}
+
+/** 按需显示指定 section（从缓存注入 DOM，保证图片在可见容器中创建） */
+function showSection(id) {
+  const cached = sectionCache[id];
+  if (!cached) return;
+  const main = document.getElementById('site-content');
+  main.innerHTML = `<section id="${id}" class="section active${cached.altClass}${cached.heroClass}"><div class="container">${cached.inner}</div></section>`;
+
+  // 高亮对应导航
+  document.querySelectorAll('#nav-links a').forEach(l => l.classList.remove('active'));
+  const link = document.querySelector(`#nav-links a[href="#${id}"]`);
+  if (link) link.classList.add('active');
 }
 
 function renderTimeline(items) {
@@ -1222,40 +1232,24 @@ function selectIdentity(identity) {
 // ===========================================================================
 
 function bindNavTabs() {
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-links a');
   const headerH = document.querySelector('.header').offsetHeight;
 
-  // 默认显示第一个板块
-  function showFirst() {
-    if (sections.length === 0) return;
-    sections.forEach(s => s.classList.remove('active'));
-    sections[0].classList.add('active');
-    navLinks.forEach(l => l.classList.remove('active'));
-    if (navLinks[0]) navLinks[0].classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }
-  showFirst();
-
-  // 导航点击切换
-  navLinks.forEach(link => {
+  document.querySelectorAll('.nav-links a').forEach(link => {
     link.addEventListener('click', function(e) {
       e.preventDefault();
       const id = this.getAttribute('href').slice(1);
-      const target = document.getElementById(id);
-      if (!target || target.classList.contains('active')) return;
+      if (this.classList.contains('active')) return;
 
-      // 隐藏所有，显示目标
-      sections.forEach(s => s.classList.remove('active'));
-      target.classList.add('active');
-
-      // 高亮当前导航
-      navLinks.forEach(l => l.classList.remove('active'));
-      this.classList.add('active');
+      showSection(id);
 
       // 滚动到板块顶部
-      const top = target.offsetTop - headerH - 20;
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      setTimeout(() => {
+        const target = document.getElementById(id);
+        if (target) {
+          const top = target.offsetTop - headerH - 20;
+          window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        }
+      }, 50);
     });
   });
 }
