@@ -692,7 +692,7 @@ const CONTENT = {
       // --- 教育背景 ---
       {
         id: 'education', type: 'timeline', alt: true,
-        title: '教育背景 & 荣誉',
+        title: '教育背景 & 奖状',
         items: [
           {
             header: '湖北工业大学工程技术学院',
@@ -1144,7 +1144,7 @@ function renderProjects(items) {
 function renderHonors(items) {
   let html = '<div class="honor-grid">';
   items.forEach(item => {
-    const src = `honor/${item.file}`;
+    const src = `award/${item.file}`;
     html += `
       <div class="honor-card">
         <img class="honor-card__img" src="${src}" alt="${item.name}">
